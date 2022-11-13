@@ -1,0 +1,21 @@
+[
+  {
+    "id": "cps-plugins",
+    "caption": "CPS-Plugins",
+    "children": [
+      {
+        "caption": "Switch Language To English",
+        "children": [
+          {
+            "caption": "切换语言",
+            "command": "cps_switch_language",
+          },
+          {
+            "caption": "重新加载",
+            "command": "cps_comments_creator_reload"
+          }
+        ]
+      }
+    ]
+  }
+]

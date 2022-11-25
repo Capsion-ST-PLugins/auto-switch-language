@@ -58,10 +58,6 @@ def change_language(lang: str = "en") -> bool:
 def check_system_language() -> str:
     """
     @Description 获取当前系统的语言
-
-
-    returns `{str}` {description}
-
     """
     import ctypes
 
@@ -75,15 +71,10 @@ class CpsSwicthLanguageEventer(sublime_plugin.EventListener):
     def on_activated_async(self, view):
         """
         @Description 每当视图切换，都执行切换一次语言
-
         """
-        change_language("en")
+        sublime.set_timeout_async(change_language("en"))
 
 
 class CpsSwitchLanguageCommand(sublime_plugin.TextCommand):
     def run(self, view):
-        change_language("en")
-
-
-if __name__ == "__main__":
-    change_language("en")
+        sublime.set_timeout_async(change_language("en"))

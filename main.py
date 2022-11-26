@@ -20,29 +20,17 @@ if sys.platform != "win32":
 if int(sublime.version()) < 3176:
     raise ImportWarning("本插件不支持当前版本，请使用大于等于3176的sublime Text")
 
-# 插件名称
-PLUGIN_NAME = "cps-auto-switch-language"
 
 # 为了引入插件目录下的 pywin32模块 添加插件目录到环境变量
-sys.path.append(os.path.join(sublime.packages_path(), PLUGIN_NAME))
+sys.path.append(os.path.join(sublime.packages_path(), __package__))
 
 # 引入模块
 import Pywin32.setup
-import win32api, win32gui
 from win32con import WM_INPUTLANGCHANGEREQUEST
+import win32api, win32gui
 
 # 设置语言
 LANG = {"zh": 0x0804, "en": 0x0409}
-
-
-def init():
-    # 为了引入插件目录下的 pywin32模块 添加插件目录到环境变量
-    sys.path.append(os.path.join(sublime.packages_path(), PLUGIN_NAME))
-
-    # 引入模块
-    import Pywin32.setup
-    import win32api, win32gui
-    from win32con import WM_INPUTLANGCHANGEREQUEST
 
 
 def change_language(lang: str = "en") -> bool:
@@ -72,9 +60,9 @@ class CpsSwicthLanguageEventer(sublime_plugin.EventListener):
         """
         @Description 每当视图切换，都执行切换一次语言
         """
-        sublime.set_timeout_async(change_language("en"))
+        change_language("en")
 
 
 class CpsSwitchLanguageCommand(sublime_plugin.TextCommand):
     def run(self, view):
-        sublime.set_timeout_async(change_language("en"))
+        change_language("en")

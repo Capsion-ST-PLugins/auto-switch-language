@@ -28,19 +28,28 @@ sys.path.append(os.path.join(sublime.packages_path(), __package__))
 import Pywin32.setup
 from win32con import WM_INPUTLANGCHANGEREQUEST
 import win32api, win32gui
+import ctypes
 
 # 设置语言
 LANG = {"zh": 0x0804, "en": 0x0409}
+EN_CODE = ["0x0409", "0xc09"]
+ZH_CODE = "0x804"
 
 
-def change_language(lang: str = "en") -> bool:
+def change_language_to_en() -> bool:
+    """
+    @Description 判断当前输入是否中文(0x0409)，如果是则进行切换，默认切换到英文：0x0409
+    """
 
-    global LANG
-    HWND = win32gui.GetForegroundWindow()
-    LANGUAGE_CODE = LANG[lang.lower()] or LANG["en"]
+    user32 = ctypes.WinDLL("user32", use_last_error=True)
+    curr_window = user32.GetForegroundWindow()
+    thread_id = user32.GetWindowThreadProcessId(curr_window, 0)
+    klid = user32.GetKeyboardLayout(thread_id)
+    lid = klid & (2**16 - 1)
 
-    res = win32api.PostMessage(HWND, WM_INPUTLANGCHANGEREQUEST, 0, LANGUAGE_CODE)
-    return res
+    if hex(lid) == ZH_CODE:
+        HWND = win32gui.GetForegroundWindow()
+        win32api.PostMessage(HWND, WM_INPUTLANGCHANGEREQUEST, 0, 0x0409)
 
 
 def check_system_language() -> str:
@@ -60,9 +69,9 @@ class CpsSwicthLanguageEventer(sublime_plugin.EventListener):
         """
         @Description 每当视图切换，都执行切换一次语言
         """
-        change_language("en")
+        change_language_to_en()
 
 
 class CpsSwitchLanguageCommand(sublime_plugin.TextCommand):
     def run(self, view):
-        change_language("en")
+        change_language_to_en()

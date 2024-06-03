@@ -36,32 +36,49 @@ EN_CODE = ["0x0409", "0xc09"]
 ZH_CODE = "0x804"
 
 
+def get_currt_lang() -> str:
+    """
+    @Description 获取当前使用的语言环境
+    """
+    try:
+        user32 = ctypes.WinDLL("user32", use_last_error=True)
+
+        curr_window = user32.GetForegroundWindow()
+        thread_id = user32.GetWindowThreadProcessId(curr_window, 0)
+
+        klid = user32.GetKeyboardLayout(thread_id)
+        lid = klid & (2**16 - 1)
+        return hex(lid)
+    except Exception as e:
+        return ""
+
+
+def change_lang(lang_code: str) -> bool:
+    """
+    @Description 切换到语言 0x0409为英文（美国）
+    """
+    HWND = win32gui.GetForegroundWindow()
+    win32api.PostMessage(HWND, WM_INPUTLANGCHANGEREQUEST, 0, lang_code)
+
+
 def change_language_to_en() -> bool:
     """
-    @Description 判断当前输入是否中文(0x0409)，如果是则进行切换，默认切换到英文：0x0409
+    @Description 切换到英文：0x0409
     """
-
-    user32 = ctypes.WinDLL("user32", use_last_error=True)
-    curr_window = user32.GetForegroundWindow()
-    thread_id = user32.GetWindowThreadProcessId(curr_window, 0)
-    klid = user32.GetKeyboardLayout(thread_id)
-    lid = klid & (2**16 - 1)
-
-    if hex(lid) == ZH_CODE:
-        HWND = win32gui.GetForegroundWindow()
-        win32api.PostMessage(HWND, WM_INPUTLANGCHANGEREQUEST, 0, 0x0409)
+    HWND = win32gui.GetForegroundWindow()
+    win32api.PostMessage(HWND, WM_INPUTLANGCHANGEREQUEST, 0, 0x0409)
 
 
-def check_system_language() -> str:
-    """
-    @Description 获取当前系统的语言
-    """
-    import ctypes
+# def check_system_language() -> str:
+#     """
+#     @Description 获取当前系统的语言
+#     """
+#     import ctypes
 
-    dll_h = ctypes.windll.kernel32
+#     dll_h = ctypes.windll.kernel32
 
-    res = hex(dll_h.GetSystemDefaultUILanguage())
-    return res
+#     res = hex(dll_h.GetSystemDefaultUILanguage())
+#     return res
 
 
 class CpsSwicthLanguageEventer(sublime_plugin.EventListener):
@@ -69,9 +86,13 @@ class CpsSwicthLanguageEventer(sublime_plugin.EventListener):
         """
         @Description 每当视图切换，都执行切换一次语言
         """
-        change_language_to_en()
+        if get_currt_lang() == ZH_CODE:
+            # change_language_to_en()
+            change_lang(LANG["en"])
 
 
 class CpsSwitchLanguageCommand(sublime_plugin.TextCommand):
     def run(self, view):
-        change_language_to_en()
+        if get_currt_lang() == ZH_CODE:
+            # change_language_to_en()
+            change_lang(LANG["en"])
